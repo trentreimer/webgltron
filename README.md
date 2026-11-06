@@ -1,11 +1,11 @@
 # WebGLTron — lightcycle arena
 
 WebGLTron is a self-contained browser recreation of **gltron**, the classic 3D lightcycle game.
-Everything — arena, trails, bikes, HUD and menus — is generated in code. The crash
-and recognizer effects are gltron's originals, embedded as small data URIs; the
-optional soundtracks are `music/revenge_of_cats.mp3` and `music/grid_pulse.mp3`
-next to the page. There are no
-libraries or network requests.
+Everything — arena, trails, bikes, HUD, menus — is generated in code, with the
+menu title set in an embedded Orbitron typeface. The crash and recognizer effects
+are gltron's originals, embedded as small data URIs; the optional soundtracks are
+`music/revenge_of_cats.mp3` and `music/grid_pulse.mp3` next to the page. There
+are no libraries or network requests.
 
 **Play it:** open `index.html` in any modern browser (Chrome, Firefox, Safari, Edge).
 No build step, no server required.  Keep the optional `music/` tracks
@@ -137,6 +137,10 @@ computer-player logic, camera behaviour and several visual constants were ported
 from the original GPL sources; the rendering, interface and this HTML
 implementation are new. The crash sound effect is taken from the gltron 0.70
 data files (GPL).
+
+The menu heading uses *Orbitron* by Matt McInerney / The Orbitron Project
+Authors, licensed under the **SIL Open Font License 1.1**; the embedded WOFF2
+and license are in `fonts/`.
 
 gltron is free software under the **GNU General Public License, version 2 or
 later**. This recreation follows the same license. It comes with no warranty.
