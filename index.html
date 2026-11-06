@@ -1866,51 +1866,20 @@ var R = (function () {
       tube([x, y1, z1], [x, y2, z2], w, RED);
     }
 
-    /* Two broad legs at the outside edges of the body, each running the full
-       front-to-back depth of the machine like the side supports in the
-       reference model.  The outer silhouette is a tall pylon with a flared
-       forward foot. */
+    /* Two pylon legs at the outer sides of the body, shaped after the
+       original recognizer model: a tall, slim column whose boot flares
+       inward toward the arena centre with a long sloped toe. */
     var s, i;
     for (s = -1; s <= 1; s += 2) {
-      var inner = s * 5.2;
-      var outer = s * 9.6;
-      var x0 = Math.min(inner, outer);
-      var x1 = Math.max(inner, outer);
-
-      /* Tall side column. */
-      prism([[-24, -18], [24, -18], [22, 18], [-22, 18]], x0, x1, HULL, 0);
-
-      /* Full-depth foot, flared forward and slightly outward. */
-      var fx0 = s > 0 ? x0 : x0 - 0.5;
-      var fx1 = s > 0 ? x1 + 0.5 : x1;
-      prism([[-27, -26], [29, -26], [29, -18], [-24, -18]], fx0, fx1, DARK, 0);
-
-      /* Recessed dark panel on the outside face. */
-      var ix0 = s > 0 ? x1 + 0.03 : x0 - 0.06;
-      var ix1 = s > 0 ? x1 + 0.06 : x0 - 0.03;
-      prism([[-19, -12], [19, -12], [17, 13], [-17, 13]], ix0, ix1, DARK, 0);
-
-      /* Continuous red outline around the outer side silhouette. */
-      var faceX = s > 0 ? x1 + 0.10 : x0 - 0.10;
-      var trim = [
-        [-24, -18], [-22, 18], [22, 18], [24, -18],
-        [29, -18], [29, -26], [-27, -26], [-24, -18]
-      ];
-      for (i = 0; i + 1 < trim.length; i++) {
-        redBar(faceX, trim[i][0], trim[i][1],
-               trim[i + 1][0], trim[i + 1][1], REC_TRIM_W);
+      /* Outer silhouette in (y, z): heel, inward toe, ankle, shin, top. */
+      var leg = [[-28.0, REC_FOOT_LOCAL], [-12.0, REC_FOOT_LOCAL],
+                 [-21.0, -20.5], [-21.0, 12.0], [-28.0, 12.0]];
+      if (s > 0) {
+        for (i = 0; i < leg.length; i++) leg[i][0] = -leg[i][0];
+        leg.reverse();
       }
-
-      /* Front-face frame, so the broad face also reads as a single leg. */
-      tube([x0, 22, 18], [x1, 22, 18], REC_TRIM_W, RED);
-      tube([x0, 24, -18], [x1, 24, -18], REC_TRIM_W, RED);
-      tube([x0, 22, 18], [x0, 24, -18], REC_TRIM_W, RED);
-      tube([x1, 22, 18], [x1, 24, -18], REC_TRIM_W, RED);
-
-      /* Red toe edge on the flared front of the foot. */
-      tube([fx0, 29, -26], [fx1, 29, -26], REC_TRIM_W, RED);
-      tube([fx0, 29, -26], [fx0, 29, -18], REC_TRIM_W, RED);
-      tube([fx1, 29, -26], [fx1, 29, -18], REC_TRIM_W, RED);
+      prism(leg, -6.0, 6.0, HULL, 0);
+      outlinePrism(leg, -6.0, 6.0, REC_TRIM_W, RED);
     }
 
     /* canopy end shoulders, sloping down from the roof to the legs */
@@ -2879,7 +2848,7 @@ var R = (function () {
         }
       }
     } catch (e) { /* private mode / corrupt storage */ }
-    if (["off", "mix", "amber", "siege", "original", "grid", "grid2", "synth"].indexOf(s.musicMode) < 0) s.musicMode = "mix";
+    if (["off", "mix", "amber", "siege", "original", "grid", "synth"].indexOf(s.musicMode) < 0) s.musicMode = "mix";
     if (!Array.isArray(s.roster) || s.roster.length !== 4) s.roster = [0, 1, 1, 1];
     s.roster = s.roster.map(function (v) { return (v === 0 || v === 1 || v === 2) ? v : 1; });
     return s;
@@ -2912,7 +2881,7 @@ var R = (function () {
   var OPT_MUSIC = [{ v: "off", l: "off" }, { v: "mix", l: "mix" },
                    { v: "amber", l: "amber" }, { v: "siege", l: "siege" },
                    { v: "original", l: "revenge" }, { v: "grid", l: "grid loop 1" },
-                   { v: "grid2", l: "grid loop 2" }, { v: "synth", l: "synth" }];
+                   { v: "synth", l: "synth" }];
 
   function cycle(arr, cur, dir) {
     var i = 0, k;
@@ -3681,9 +3650,7 @@ var R = (function () {
       siege:    { name: "Underground Siege", src: "music/Underground_Siege.mp3" },
       original: { name: "Revenge of the Cats", src: "music/Revenge_of_the_Cats.mp3" },
       grid:     { name: "Grid Loop 1",       src: "music/Grid_Loop_1.mp3" },
-      //grid2:    { name: "Grid Loop 2",       src: "music/Grid_Loop_2.mp3" }
     };
-    //var MIX_ORDER = ["siege", "original", "grid", "grid2"];
     var MIX_ORDER = ["siege", "original", "grid"];
 
     var musicEl = document.createElement("audio");
@@ -4495,7 +4462,7 @@ var R = (function () {
     if (q.get("nosound") === "1") { settings.sound = false; settings.musicMode = "off"; }
     if (q.has("music")) {
       var mm = q.get("music");
-      if (["off", "mix", "amber", "siege", "original", "grid", "grid2", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
+      if (["off", "mix", "amber", "siege", "original", "grid", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
     }
     if (q.get("fps") === "1") settings.fps = true;
     if (q.get("touch") === "1") hasTouch = true;
