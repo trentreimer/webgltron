@@ -3661,14 +3661,14 @@ var R = (function () {
     } catch (e) { recBuf = null; }
 
     /* Soundtracks are optional sidecar files.  One <audio> element plays
-       either a single track on loop or the four-track Mix in playlist order. */
+       either a single track on loop or the three-track Mix in playlist order. */
     var TRACKS = {
       amber:    { name: "Amber Corridor",    src: "music/Amber_Corridor.mp3" },
       siege:    { name: "Underground Siege", src: "music/Underground_Siege.mp3" },
-      original: { name: "Revenge of the Cats", src: "music/revenge_of_cats.mp3" },
+      original: { name: "Revenge of the Cats", src: "music/Revenge_of_the_Cats.mp3" },
       grid:     { name: "Grid Loop 1",       src: "music/Grid_Loop_1.mp3" }
     };
-    var MIX_ORDER = ["amber", "siege", "original", "grid"];
+    var MIX_ORDER = ["original", "grid", "siege"];
 
     var musicEl = document.createElement("audio");
     musicEl.preload = "auto";

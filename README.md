@@ -5,7 +5,7 @@ Everything — arena, trails, bikes, HUD, menus — is generated in code, with t
 menu title set in an embedded Orbitron typeface. The crash and recognizer effects
 are gltron's originals, embedded as small data URIs; the optional soundtracks are
 `music/Amber_Corridor.mp3`, `music/Underground_Siege.mp3`,
-`music/revenge_of_cats.mp3` and `music/Grid_Loop_1.mp3` next to the page. There
+`music/Revenge_of_the_Cats.mp3` and `music/Grid_Loop_1.mp3` next to the page. There
 are no libraries or network requests.
 
 **Play it:** open `index.html` in any modern browser (Chrome, Firefox, Safari, Edge).
@@ -37,8 +37,8 @@ next to it if you want the soundtracks.
 - **Attract mode** behind the menu, plus a full-screen demo you can watch.
 - **Audio** — synthesised engine hum and booster whoosh, plus gltron's original
   derezz and recognizer-flyby effects. The music can be switched between the
-  four-track **Mix** (Amber Corridor → Underground Siege → Revenge of the Cats
-  → Grid Loop 1), any individual track, the built-in synth, or off.
+  three-track **Mix** (Revenge of the Cats → Grid Loop 1 → Underground Siege),
+  any individual track, the built-in synth, or off.
 - **Idle cursor hiding** — the pointer disappears while you play once it stops
   moving, and comes back the moment you move it.
 - **Menus, pause, help and round-over screens**, persisted settings and scores,
@@ -95,9 +95,9 @@ All settings are in the main menu and persist in `localStorage`:
 - **Viewports** — auto, single, split, quad
 - **2D map** — none to huge
 - **Glow**, **Recognizer**, **Sound**
-- **Music** — `off`, `mix` (default; Amber Corridor → Underground Siege →
-  Revenge of the Cats → Grid Loop 1), `amber`, `siege`, `original`
-  (*Revenge of the Cats*), `grid` (*Grid Loop 1*), or `synth`
+- **Music** — `off`, `mix` (default; Revenge of the Cats → Grid Loop 1 →
+  Underground Siege), `amber`, `siege`, `original` (*Revenge of the Cats*),
+  `grid` (*Grid Loop 1*), or `synth`
 - **Reset scores** and **Controls**
 
 ## URL parameters (handy for demos and testing)
