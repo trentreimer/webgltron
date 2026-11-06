@@ -2881,7 +2881,7 @@ var R = (function () {
   var OPT_MUSIC = [{ v: "off", l: "off" }, { v: "mix", l: "mix" },
                    { v: "amber", l: "amber" }, { v: "siege", l: "siege" },
                    { v: "original", l: "revenge" }, { v: "grid", l: "grid loop 1" },
-                   { v: "synth", l: "synth" }];
+                   { v: "steel", l: "steel" }, { v: "synth", l: "synth" }];
 
   function cycle(arr, cur, dir) {
     var i = 0, k;
@@ -3649,9 +3649,10 @@ var R = (function () {
       amber:    { name: "Amber Corridor",    src: "music/Amber_Corridor.mp3" },
       siege:    { name: "Underground Siege", src: "music/Underground_Siege.mp3" },
       original: { name: "Revenge of the Cats", src: "music/Revenge_of_the_Cats.mp3" },
+      steel:    { name: "Steel Perimeter", src: "music/Steel_Perimeter.mp3" },
       grid:     { name: "Grid Loop 1",       src: "music/Grid_Loop_1.mp3" },
     };
-    var MIX_ORDER = ["siege", "original", "grid"];
+    var MIX_ORDER = ["original", "steel", "siege", "grid"];
 
     var musicEl = document.createElement("audio");
     musicEl.preload = "auto";
@@ -4462,7 +4463,7 @@ var R = (function () {
     if (q.get("nosound") === "1") { settings.sound = false; settings.musicMode = "off"; }
     if (q.has("music")) {
       var mm = q.get("music");
-      if (["off", "mix", "amber", "siege", "original", "grid", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
+      if (["off", "mix", "original", "steel", "amber", "siege", "grid", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
     }
     if (q.get("fps") === "1") settings.fps = true;
     if (q.get("touch") === "1") hasTouch = true;
