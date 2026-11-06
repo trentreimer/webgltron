@@ -1,6 +1,6 @@
-# HTMLTRON — lightcycle arena
+# WebGLTron — lightcycle arena
 
-A self-contained browser recreation of **gltron**, the classic 3D lightcycle game.
+WebGLTron is a self-contained browser recreation of **gltron**, the classic 3D lightcycle game.
 Everything — arena, trails, bikes, HUD and menus — is generated in code. The crash
 and recognizer effects are gltron's originals, embedded as small data URIs; the
 optional soundtracks are `music/revenge_of_cats.mp3` and `music/grid_pulse.mp3`
@@ -11,7 +11,7 @@ libraries or network requests.
 No build step, no server required.  Keep the optional `music/` tracks
 next to it if you want the soundtracks.
 
-![HTMLTRON gameplay](screenshot.png)
+![WebGLTron gameplay](screenshot.png)
 
 ## Features
 
