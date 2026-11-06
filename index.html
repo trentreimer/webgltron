@@ -71,7 +71,19 @@
     max-height:94vh;
     overflow:auto;
     padding:16px 20px 12px;
-    background:linear-gradient(180deg, rgba(4,16,22,.95) 0%, rgba(1,7,11,.97) 100%);
+    /* Corner brackets are backgrounds, not ::before/::after: the panel's
+       stable scrollbar gutter would otherwise shift the bottom-right one. */
+    background-image:
+      linear-gradient(var(--cyan), var(--cyan)),
+      linear-gradient(var(--cyan), var(--cyan)),
+      linear-gradient(var(--cyan), var(--cyan)),
+      linear-gradient(var(--cyan), var(--cyan)),
+      linear-gradient(180deg, rgba(4,16,22,.95) 0%, rgba(1,7,11,.97) 100%);
+    background-repeat:no-repeat;
+    background-size:14px 2px, 2px 14px, 14px 2px, 2px 14px, 100% 100%;
+    background-position:1px 1px, 1px 1px, right 1px bottom 1px, right 1px bottom 1px, 0 0;
+    background-origin:border-box;
+    background-clip:border-box;
     border:1px solid rgba(95,240,255,.28);
     box-shadow:
       0 0 0 1px rgba(0,0,0,.7),
@@ -86,11 +98,6 @@
   }
   .panel::-webkit-scrollbar{width:8px}
   .panel::-webkit-scrollbar-thumb{background:var(--cyan-dim)}
-  .panel::before,.panel::after{
-    content:"";position:absolute;width:14px;height:14px;pointer-events:none;
-  }
-  .panel::before{left:0;top:0;border-left:2px solid var(--cyan);border-top:2px solid var(--cyan)}
-  .panel::after{right:0;bottom:0;border-right:2px solid var(--cyan);border-bottom:2px solid var(--cyan)}
   .panel.small{width:min(420px,92vw);padding:18px}
   .panel.narrow{width:min(560px,94vw)}
 
