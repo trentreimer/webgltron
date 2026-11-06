@@ -37,7 +37,7 @@ next to it if you want the soundtracks.
 - **Attract mode** behind the menu, plus a full-screen demo you can watch.
 - **Audio** — synthesised engine hum and booster whoosh, plus gltron's original
   derezz and recognizer-flyby effects. The music can be switched between the
-  three-track **Mix** (Revenge of the Cats → Grid Loop 1 → Underground Siege),
+  three-track **Mix** (Underground Siege → Revenge of the Cats → Grid Loop 1),
   any individual track, the built-in synth, or off.
 - **Idle cursor hiding** — the pointer disappears while you play once it stops
   moving, and comes back the moment you move it.
@@ -95,8 +95,8 @@ All settings are in the main menu and persist in `localStorage`:
 - **Viewports** — auto, single, split, quad
 - **2D map** — none to huge
 - **Glow**, **Recognizer**, **Sound**
-- **Music** — `off`, `mix` (default; Revenge of the Cats → Grid Loop 1 →
-  Underground Siege), `amber`, `siege`, `original` (*Revenge of the Cats*),
+- **Music** — `off`, `mix` (default; Underground Siege → Revenge of the Cats →
+  Grid Loop 1), `amber`, `siege`, `original` (*Revenge of the Cats*),
   `grid` (*Grid Loop 1*), or `synth`
 - **Reset scores** and **Controls**
 
