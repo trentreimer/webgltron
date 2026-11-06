@@ -2853,7 +2853,7 @@ var R = (function () {
         }
       }
     } catch (e) { /* private mode / corrupt storage */ }
-    if (["off", "original", "synth"].indexOf(s.musicMode) < 0) s.musicMode = "original";
+    if (["off", "original", "grid", "synth"].indexOf(s.musicMode) < 0) s.musicMode = "original";
     if (!Array.isArray(s.roster) || s.roster.length !== 4) s.roster = [0, 1, 1, 1];
     s.roster = s.roster.map(function (v) { return (v === 0 || v === 1 || v === 2) ? v : 1; });
     return s;
@@ -2884,7 +2884,7 @@ var R = (function () {
                  { v: 0.5, l: "medium" }, { v: 0.9, l: "huge" }];
   var OPT_ON = [{ v: false, l: "off" }, { v: true, l: "on" }];
   var OPT_MUSIC = [{ v: "off", l: "off" }, { v: "original", l: "original" },
-                   { v: "synth", l: "synth" }];
+                   { v: "grid", l: "grid" }, { v: "synth", l: "synth" }];
 
   function cycle(arr, cur, dir) {
     var i = 0, k;
@@ -3034,6 +3034,10 @@ var R = (function () {
         if (settings.musicMode === "original" && audio && audio.originalFailed &&
             audio.originalFailed()) {
           toast("soundtrack file missing - put it in music/", 2600);
+        }
+        if (settings.musicMode === "grid" && audio && audio.gridFailed &&
+            audio.gridFailed()) {
+          toast("grid pulse track missing - put it in music/", 2600);
         }
         return true;
       }
@@ -3645,20 +3649,26 @@ var R = (function () {
         .catch(function () { recBuf = null; });
     } catch (e) { recBuf = null; }
 
-    /* The original soundtrack is an optional sidecar file.  Using an
-       <audio> element keeps it working from file:// (no fetch/CORS). */
-    var musicEl = document.createElement("audio");
-    musicEl.preload = "auto";
-    musicEl.loop = true;
-    musicEl.volume = 0.35;
-    var originalReady = false;
-    var originalFailed = false;
-    musicEl.addEventListener("canplaythrough", function () { originalReady = true; });
-    musicEl.addEventListener("error", function () {
-      originalFailed = true;
-      if (window.console) console.warn("[gltron] music/revenge_of_cats.mp3 could not be loaded");
-    });
-    musicEl.src = "music/revenge_of_cats.mp3";
+    /* Soundtracks are optional sidecar files.  Using <audio> elements keeps
+       them working from file:// (no fetch/CORS). */
+    function sidecarTrack(src) {
+      var el = document.createElement("audio");
+      el.preload = "auto";
+      el.loop = true;
+      el.volume = 0.35;
+      var t = { el: el, ready: false, failed: false };
+      el.addEventListener("canplaythrough", function () { t.ready = true; });
+      el.addEventListener("error", function () {
+        t.failed = true;
+        if (window.console) console.warn("[gltron] " + src + " could not be loaded");
+      });
+      el.src = src;
+      return t;
+    }
+    var originalTrack = sidecarTrack("music/revenge_of_cats.mp3");
+    var gridTrack = sidecarTrack("music/grid_pulse.mp3");
+    var musicEl = originalTrack.el;
+    var gridEl = gridTrack.el;
 
     var music = ctx.createGain();
     music.gain.value = 0;
@@ -3912,20 +3922,24 @@ var R = (function () {
       return true;
     }
 
+    function sidecarPlay(track, want) {
+      if (want) {
+        try {
+          var pr = track.el.play();
+          if (pr && pr.catch) pr.catch(function () { /* retried on next gesture */ });
+        } catch (e) { /* ignore */ }
+      } else {
+        try { track.el.pause(); } catch (e) { /* ignore */ }
+      }
+    }
+
     function applySettings(soundOn, musicMode) {
       sfx.gain.setTargetAtTime(soundOn ? 1 : 0, ctx.currentTime, 0.03);
       var synthOn = musicMode === "synth";
       music.gain.setTargetAtTime(synthOn ? 0.55 : 0, ctx.currentTime, 0.2);
       if (synthOn) musicStart();
-      var wantOriginal = musicMode === "original" && !originalFailed;
-      if (wantOriginal) {
-        try {
-          var pr = musicEl.play();
-          if (pr && pr.catch) pr.catch(function () { /* retried on next gesture */ });
-        } catch (e) { /* ignore */ }
-      } else {
-        try { musicEl.pause(); } catch (e) { /* ignore */ }
-      }
+      sidecarPlay(originalTrack, musicMode === "original" && !originalTrack.failed);
+      sidecarPlay(gridTrack, musicMode === "grid" && !gridTrack.failed);
     }
 
     engineStart();
@@ -3942,11 +3956,15 @@ var R = (function () {
       recognizer: recognizer,
       hasRecognizer: function () { return !!recBuf; },
       recognizerCount: function () { return recCount; },
-      originalReady: function () { return originalReady; },
-      originalFailed: function () { return originalFailed; },
+      originalReady: function () { return originalTrack.ready; },
+      originalFailed: function () { return originalTrack.failed; },
+      gridReady: function () { return gridTrack.ready; },
+      gridFailed: function () { return gridTrack.failed; },
       musicState: function () {
         return { paused: musicEl.paused, time: musicEl.currentTime,
-                 ready: originalReady, failed: originalFailed };
+                 ready: originalTrack.ready, failed: originalTrack.failed,
+                 gridPaused: gridEl.paused, gridTime: gridEl.currentTime,
+                 gridReady: gridTrack.ready, gridFailed: gridTrack.failed };
       },
       boost: boost,
       fanfare: fanfare,
@@ -4394,7 +4412,7 @@ var R = (function () {
     if (q.get("nosound") === "1") { settings.sound = false; settings.musicMode = "off"; }
     if (q.has("music")) {
       var mm = q.get("music");
-      if (["off", "original", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
+      if (["off", "original", "grid", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
     }
     if (q.get("fps") === "1") settings.fps = true;
     if (q.get("touch") === "1") hasTouch = true;

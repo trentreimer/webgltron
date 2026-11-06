@@ -3,12 +3,13 @@
 A self-contained browser recreation of **gltron**, the classic 3D lightcycle game.
 Everything — arena, trails, bikes, HUD and menus — is generated in code. The crash
 and recognizer effects are gltron's originals, embedded as small data URIs; the
-optional soundtrack is `music/revenge_of_cats.mp3` next to the page. There are no
+optional soundtracks are `music/revenge_of_cats.mp3` and `music/grid_pulse.mp3`
+next to the page. There are no
 libraries or network requests.
 
 **Play it:** open `index.html` in any modern browser (Chrome, Firefox, Safari, Edge).
-No build step, no server required.  Keep the optional `music/revenge_of_cats.mp3`
-next to it if you want the original gltron soundtrack.
+No build step, no server required.  Keep the optional `music/` tracks
+next to it if you want the soundtracks.
 
 ![GLTRON gameplay](screenshot.png)
 
@@ -35,7 +36,8 @@ next to it if you want the original gltron soundtrack.
 - **Attract mode** behind the menu, plus a full-screen demo you can watch.
 - **Audio** — synthesised engine hum and booster whoosh, plus gltron's original
   derezz and recognizer-flyby effects. The music can be switched between the
-  original *Revenge of Cats* track, the built-in synth, or off.
+  original *Revenge of Cats* track, *Grid Pulse* — an original 128 BPM techno
+  loop built for this project — the built-in synth, or off.
 - **Idle cursor hiding** — the pointer disappears while you play once it stops
   moving, and comes back the moment you move it.
 - **Menus, pause, help and round-over screens**, persisted settings and scores,
@@ -92,7 +94,9 @@ All settings are in the main menu and persist in `localStorage`:
 - **Viewports** — auto, single, split, quad
 - **2D map** — none to huge
 - **Glow**, **Recognizer**, **Sound**
-- **Music** — `off`, `original` (requires `music/revenge_of_cats.mp3`) or `synth`
+- **Music** — `off`, `original` (requires `music/revenge_of_cats.mp3`),
+  `grid` (the original *Grid Pulse* loop, requires `music/grid_pulse.mp3`) or
+  `synth`
 - **Reset scores** and **Controls**
 
 ## URL parameters (handy for demos and testing)
@@ -100,7 +104,8 @@ All settings are in the main menu and persist in `localStorage`:
 `?play=1` starts a round immediately, `?spectate=1` skips the menu,
 `?seed=N` fixes the random seed, `?arena=N`, `?speed=N`, `?humans=N`,
 `?cam=0..3`, `?vp=single|split|quad|auto`, `?time=MS` fast-forwards the round,
-`?hud=0` hides the HUD, `?nosound=1` starts muted, `?touch=1` forces the
+`?hud=0` hides the HUD, `?nosound=1` starts muted,
+`?music=off|original|grid|synth` picks a soundtrack, `?touch=1` forces the
 touch pad, `?fps=1` shows the frame counter.
 
 Examples:
@@ -124,9 +129,10 @@ is generated procedurally at startup. Audio is built with the Web Audio API.
 ## Credits and license
 
 This is a tribute to **gltron 0.70** by Andreas Umbach, Michael Kircher and
-contributors (https://www.gltron.org/). The optional soundtrack is
-*"Revenge of Cats"* by **Peter Hajba (Skaven)**, as shipped with gltron and
-copyright Peter Hajba; it is included here with the original attribution. The game rules, lightcycle physics,
+contributors (https://www.gltron.org/). The optional *"Revenge of Cats"*
+soundtrack is by **Peter Hajba (Skaven)**, as shipped with gltron and
+copyright Peter Hajba; it is included here with the original attribution.
+*"Grid Pulse"* is an original composition generated for this project. The game rules, lightcycle physics,
 computer-player logic, camera behaviour and several visual constants were ported
 from the original GPL sources; the rendering, interface and this HTML
 implementation are new. The crash sound effect is taken from the gltron 0.70
