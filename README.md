@@ -1,4 +1,4 @@
-# GLTRON — lightcycle arena (HTML edition)
+# HTMLTRON — lightcycle arena
 
 A self-contained browser recreation of **gltron**, the classic 3D lightcycle game.
 Everything — arena, trails, bikes, HUD and menus — is generated in code. The crash
