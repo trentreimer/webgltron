@@ -3,5 +3,7 @@
 .idea
 .vscode
 
-# local tool config (this path is symlinked to ~/.config/opencode)
-opencode.jsonc
+# Tools and reference files
+tools
+tests
+AGENTS.md
