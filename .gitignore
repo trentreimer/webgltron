@@ -1,0 +1,7 @@
+# OS / editor noise
+.DS_Store
+.idea
+.vscode
+
+# local tool config (this path is symlinked to ~/.config/opencode)
+opencode.jsonc
