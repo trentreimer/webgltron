@@ -1866,35 +1866,51 @@ var R = (function () {
       tube([x, y1, z1], [x, y2, z2], w, RED);
     }
 
-    /* Two long legs, one on each side of the recognizer.  The broad single
-       shin silhouette replaces the old front/rear leg pairs. */
+    /* Two broad legs at the outside edges of the body, each running the full
+       front-to-back depth of the machine like the side supports in the
+       reference model.  The outer silhouette is a tall pylon with a flared
+       forward foot. */
     var s, i;
     for (s = -1; s <= 1; s += 2) {
-      var yc = s * 18.0;
-      var xc = s * 4.2;
-      prism([[yc - 6.0, -2], [yc + 6.0, -2],
-             [yc + 6.5, 18], [yc - 6.5, 18]], xc - 3.0, xc + 3.0, HULL, 0);
-      prism([[yc - 5.2, -20], [yc + 5.2, -20],
-             [yc + 6.0, -2], [yc - 6.0, -2]], xc - 3.0, xc + 3.0, HULL, 0);
-      var foot = [[yc - 6.8, REC_FOOT_LOCAL], [yc + 6.8, REC_FOOT_LOCAL],
-                  [yc + 5.4, -20], [yc - 5.4, -20]];
-      prism(foot, xc - 3.2, xc + 3.2, DARK, 0);
+      var inner = s * 5.2;
+      var outer = s * 9.6;
+      var x0 = Math.min(inner, outer);
+      var x1 = Math.max(inner, outer);
 
-      /* One continuous neon outline per leg: down the full leg, round the
-         ankle and out over the foot, so each boot remains part of the
-         leg silhouette instead of a separately outlined box. */
-      var legTrim = [
-        [yc + 6.5, 18], [yc + 6.0, -2], [yc + 5.4, -20],
-        [yc + 6.8, REC_FOOT_LOCAL], [yc - 6.8, REC_FOOT_LOCAL],
-        [yc - 5.4, -20], [yc - 6.0, -2], [yc - 6.5, 18]
+      /* Tall side column. */
+      prism([[-24, -18], [24, -18], [22, 18], [-22, 18]], x0, x1, HULL, 0);
+
+      /* Full-depth foot, flared forward and slightly outward. */
+      var fx0 = s > 0 ? x0 : x0 - 0.5;
+      var fx1 = s > 0 ? x1 + 0.5 : x1;
+      prism([[-27, -26], [29, -26], [29, -18], [-24, -18]], fx0, fx1, DARK, 0);
+
+      /* Recessed dark panel on the outside face. */
+      var ix0 = s > 0 ? x1 + 0.03 : x0 - 0.06;
+      var ix1 = s > 0 ? x1 + 0.06 : x0 - 0.03;
+      prism([[-19, -12], [19, -12], [17, 13], [-17, 13]], ix0, ix1, DARK, 0);
+
+      /* Continuous red outline around the outer side silhouette. */
+      var faceX = s > 0 ? x1 + 0.10 : x0 - 0.10;
+      var trim = [
+        [-24, -18], [-22, 18], [22, 18], [24, -18],
+        [29, -18], [29, -26], [-27, -26], [-24, -18]
       ];
-      for (i = 0; i < 2; i++) {
-        var xx = i ? xc - 3.2 : xc + 3.2;
-        for (var li = 0; li + 1 < legTrim.length; li++) {
-          redBar(xx, legTrim[li][0], legTrim[li][1],
-                 legTrim[li + 1][0], legTrim[li + 1][1], REC_TRIM_W);
-        }
+      for (i = 0; i + 1 < trim.length; i++) {
+        redBar(faceX, trim[i][0], trim[i][1],
+               trim[i + 1][0], trim[i + 1][1], REC_TRIM_W);
       }
+
+      /* Front-face frame, so the broad face also reads as a single leg. */
+      tube([x0, 22, 18], [x1, 22, 18], REC_TRIM_W, RED);
+      tube([x0, 24, -18], [x1, 24, -18], REC_TRIM_W, RED);
+      tube([x0, 22, 18], [x0, 24, -18], REC_TRIM_W, RED);
+      tube([x1, 22, 18], [x1, 24, -18], REC_TRIM_W, RED);
+
+      /* Red toe edge on the flared front of the foot. */
+      tube([fx0, 29, -26], [fx1, 29, -26], REC_TRIM_W, RED);
+      tube([fx0, 29, -26], [fx0, 29, -18], REC_TRIM_W, RED);
+      tube([fx1, 29, -26], [fx1, 29, -18], REC_TRIM_W, RED);
     }
 
     /* canopy end shoulders, sloping down from the roof to the legs */
