@@ -42,8 +42,8 @@ next to it if you want the soundtracks.
   Grid Loop 2), any individual track, the built-in synth, or off.
 - **Idle cursor hiding** — the pointer disappears while you play once it stops
   moving, and comes back the moment you move it.
-- **Menus, pause, help and round-over screens**, persisted settings and scores,
-  minimap, FPS counter, touch controls and gamepad support.
+- **Menus, pause, help and round-over screens**, persisted settings and
+  session-only scores, minimap, FPS counter, touch controls and gamepad support.
 
 ## Controls
 
@@ -84,7 +84,8 @@ when not in use. Glancing turns your head (camera) without turning the bike.
 
 ## Settings
 
-All settings are in the main menu and persist in `localStorage`:
+All settings are in the main menu and persist in `localStorage`. Scores are kept
+for the current session only and reset when the page is reloaded:
 
 - **Players 1–4** — human, computer, or none (at least two cycles must play)
 - **Arena** — tiny (160) to extreme (1200)

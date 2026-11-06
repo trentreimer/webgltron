@@ -2807,7 +2807,7 @@ var R = (function () {
 
   var MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
   var STORE_KEY = "gltron.html.settings.v1";
-  var SCORE_KEY = "gltron.html.scores.v1";
+  var LEGACY_SCORE_KEY = "gltron.html.scores.v1";
 
   var DEFAULTS = {
     roster: [0, 1, 1, 1],
@@ -2847,13 +2847,7 @@ var R = (function () {
           else if (o.music === true) s.musicMode = "mix";
         }
       }
-      var rawS = localStorage.getItem(SCORE_KEY);
-      if (rawS) {
-        var a = JSON.parse(rawS);
-        if (Array.isArray(a) && a.length === 4) {
-          scores = a.map(function (v) { return Math.max(0, v | 0); });
-        }
-      }
+      localStorage.removeItem(LEGACY_SCORE_KEY);
     } catch (e) { /* private mode / corrupt storage */ }
     if (["off", "mix", "amber", "siege", "original", "grid", "synth"].indexOf(s.musicMode) < 0) s.musicMode = "mix";
     if (!Array.isArray(s.roster) || s.roster.length !== 4) s.roster = [0, 1, 1, 1];
@@ -2864,7 +2858,6 @@ var R = (function () {
   function saveSettings() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(settings));
-      localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
     } catch (e) { /* ignore */ }
   }
 
