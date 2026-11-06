@@ -11,7 +11,7 @@ libraries or network requests.
 No build step, no server required.  Keep the optional `music/` tracks
 next to it if you want the soundtracks.
 
-![GLTRON gameplay](screenshot.png)
+![HTMLTRON gameplay](screenshot.png)
 
 ## Features
 
