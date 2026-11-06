@@ -2865,7 +2865,7 @@ var R = (function () {
         }
       }
     } catch (e) { /* private mode / corrupt storage */ }
-    if (["off", "mix", "amber", "siege", "original", "grid", "synth"].indexOf(s.musicMode) < 0) s.musicMode = "mix";
+    if (["off", "mix", "amber", "siege", "original", "grid", "grid2", "synth"].indexOf(s.musicMode) < 0) s.musicMode = "mix";
     if (!Array.isArray(s.roster) || s.roster.length !== 4) s.roster = [0, 1, 1, 1];
     s.roster = s.roster.map(function (v) { return (v === 0 || v === 1 || v === 2) ? v : 1; });
     return s;
@@ -2897,8 +2897,8 @@ var R = (function () {
   var OPT_ON = [{ v: false, l: "off" }, { v: true, l: "on" }];
   var OPT_MUSIC = [{ v: "off", l: "off" }, { v: "mix", l: "mix" },
                    { v: "amber", l: "amber" }, { v: "siege", l: "siege" },
-                   { v: "original", l: "revenge" }, { v: "grid", l: "grid loop" },
-                   { v: "synth", l: "synth" }];
+                   { v: "original", l: "revenge" }, { v: "grid", l: "grid loop 1" },
+                   { v: "grid2", l: "grid loop 2" }, { v: "synth", l: "synth" }];
 
   function cycle(arr, cur, dir) {
     var i = 0, k;
@@ -3666,9 +3666,10 @@ var R = (function () {
       amber:    { name: "Amber Corridor",    src: "music/Amber_Corridor.mp3" },
       siege:    { name: "Underground Siege", src: "music/Underground_Siege.mp3" },
       original: { name: "Revenge of the Cats", src: "music/Revenge_of_the_Cats.mp3" },
-      grid:     { name: "Grid Loop 1",       src: "music/Grid_Loop_1.mp3" }
+      grid:     { name: "Grid Loop 1",       src: "music/Grid_Loop_1.mp3" },
+      grid2:    { name: "Grid Loop 2",       src: "music/Grid_Loop_2.mp3" }
     };
-    var MIX_ORDER = ["siege", "original", "grid"];
+    var MIX_ORDER = ["siege", "original", "grid", "grid2"];
 
     var musicEl = document.createElement("audio");
     musicEl.preload = "auto";
@@ -4479,7 +4480,7 @@ var R = (function () {
     if (q.get("nosound") === "1") { settings.sound = false; settings.musicMode = "off"; }
     if (q.has("music")) {
       var mm = q.get("music");
-      if (["off", "mix", "amber", "siege", "original", "grid", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
+      if (["off", "mix", "amber", "siege", "original", "grid", "grid2", "synth"].indexOf(mm) >= 0) settings.musicMode = mm;
     }
     if (q.get("fps") === "1") settings.fps = true;
     if (q.get("touch") === "1") hasTouch = true;

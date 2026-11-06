@@ -5,7 +5,8 @@ Everything — arena, trails, bikes, HUD, menus — is generated in code, with t
 menu title set in an embedded Orbitron typeface. The crash and recognizer effects
 are gltron's originals, embedded as small data URIs; the optional soundtracks are
 `music/Amber_Corridor.mp3`, `music/Underground_Siege.mp3`,
-`music/Revenge_of_the_Cats.mp3` and `music/Grid_Loop_1.mp3` next to the page. There
+`music/Revenge_of_the_Cats.mp3`, `music/Grid_Loop_1.mp3` and
+`music/Grid_Loop_2.mp3` next to the page. There
 are no libraries or network requests.
 
 **Play it:** open `index.html` in any modern browser (Chrome, Firefox, Safari, Edge).
@@ -37,8 +38,8 @@ next to it if you want the soundtracks.
 - **Attract mode** behind the menu, plus a full-screen demo you can watch.
 - **Audio** — synthesised engine hum and booster whoosh, plus gltron's original
   derezz and recognizer-flyby effects. The music can be switched between the
-  three-track **Mix** (Underground Siege → Revenge of the Cats → Grid Loop 1),
-  any individual track, the built-in synth, or off.
+  four-track **Mix** (Underground Siege → Revenge of the Cats → Grid Loop 1 →
+  Grid Loop 2), any individual track, the built-in synth, or off.
 - **Idle cursor hiding** — the pointer disappears while you play once it stops
   moving, and comes back the moment you move it.
 - **Menus, pause, help and round-over screens**, persisted settings and scores,
@@ -96,8 +97,9 @@ All settings are in the main menu and persist in `localStorage`:
 - **2D map** — none to huge
 - **Glow**, **Recognizer**, **Sound**
 - **Music** — `off`, `mix` (default; Underground Siege → Revenge of the Cats →
-  Grid Loop 1), `amber`, `siege`, `original` (*Revenge of the Cats*),
-  `grid` (*Grid Loop 1*), or `synth`
+  Grid Loop 1 → Grid Loop 2), `amber`, `siege`, `original`
+  (*Revenge of the Cats*), `grid` (*Grid Loop 1*), `grid2` (*Grid Loop 2*), or
+  `synth`
 - **Reset scores** and **Controls**
 
 ## URL parameters (handy for demos and testing)
@@ -106,7 +108,7 @@ All settings are in the main menu and persist in `localStorage`:
 `?seed=N` fixes the random seed, `?arena=N`, `?speed=N`, `?humans=N`,
 `?cam=0..3`, `?vp=single|split|quad|auto`, `?time=MS` fast-forwards the round,
 `?hud=0` hides the HUD, `?nosound=1` starts muted,
-`?music=off|mix|amber|siege|original|grid|synth` picks a soundtrack, `?touch=1` forces the
+`?music=off|mix|amber|siege|original|grid|grid2|synth` picks a soundtrack, `?touch=1` forces the
 touch pad, `?fps=1` shows the frame counter.
 
 Examples:
@@ -134,7 +136,8 @@ contributors (https://www.gltron.org/). The optional *"Revenge of Cats"*
 soundtrack is by **Peter Hajba (Skaven)**, as shipped with gltron and
 copyright Peter Hajba; it is included here with the original attribution.
 The game also ships with the additional soundtrack tracks *"Amber Corridor"*,
-*"Underground Siege"* and *"Grid Loop 1"*. The game rules, lightcycle physics,
+*"Underground Siege"*, *"Grid Loop 1"* and *"Grid Loop 2"*, an original
+cinematic techno composition with synthesized strings and dark brass. The game rules, lightcycle physics,
 computer-player logic, camera behaviour and several visual constants were ported
 from the original GPL sources; the rendering, interface and this HTML
 implementation are new. The crash sound effect is taken from the gltron 0.70
