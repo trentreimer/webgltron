@@ -33,8 +33,8 @@ next to it if you want the soundtracks.
 - **3D WebGL rendering** with a neon arena: textured grid floor, circuit-board
   walls, procedural lightcycles, glowing trail walls, shadows, explosions,
   the flying recognizer, and a bloom post-process.
-- **Up to four players** in single, split-screen or quad viewports; human or
-  computer controlled per player.
+- **Up to two human players** plus computer opponents, in single, split-screen or
+  quad viewports.
 - **Attract mode** behind the menu, plus a full-screen demo you can watch.
 - **Audio** — synthesised engine hum and booster whoosh, plus gltron's original
   derezz and recognizer-flyby effects. The music can be switched between the
@@ -44,22 +44,23 @@ next to it if you want the soundtracks.
   moving, and comes back the moment you move it.
 - **Menus, pause, help and round-over screens**, persisted settings and
   session-only scores, minimap, FPS counter, touch controls and gamepad support.
+- **Small-screen fullscreen** — Start Game requests fullscreen on touch or compact
+  viewports, and returning to the menu exits it.
+- **Mode-aware touch controls** — the on-screen boost button and its charge bar
+  appear only in booster game modes.
 
 ## Controls
 
 | Player | Turn left | Turn right | Glance left | Glance right | Boost |
 |--------|-----------|------------|-------------|--------------|-------|
-| 1 | `A` | `S` | `Q` | `W` | `E` |
-| 2 | `J` | `K` | `U` | `I` | `L` |
-| 3 | `←` | `→` | `Del` | `End` | `↓` |
-| 4 | `4` | `6` | `7` | `9` | `5` |
+| 1 | `←` / `K` | `→` / `L` | `Del` / `I` | `End` / `O` | `Space` / `P` |
+| 2 | `A` | `S` | `Q` | `W` | `E` |
 
-When exactly one human is playing, **arrow keys + Space** also work for that player.
-Numpad digits work as well as the number row for player 4.
+Players 3 and 4 are always computer-controlled (or disabled); they cannot be human.
 
 | Global | |
 |--------|---|
-| `Esc` / `P` | pause / resume |
+| `Esc` | pause / resume |
 | `R` | restart the round |
 | `M` | mute |
 | `H` | controls |
@@ -87,10 +88,11 @@ when not in use. Glancing turns your head (camera) without turning the bike.
 All settings are in the main menu and persist in `localStorage`. Scores are kept
 for the current session only and reset when the page is reloaded:
 
-- **Players 1–4** — human, computer, or none (at least two cycles must play)
+- **Players 1–2** — human, computer, or none; **players 3–4** — computer or none
+  (at least two cycles must play)
 - **Arena** — tiny (160) to extreme (1200)
 - **Game speed** — boring (5) to crazy (12)
-- **Game type** — classic, booster, wall acceleration, or both
+- **Game type** — classic (default), booster, wall acceleration, or both
 - **Bot skill** — dumb, normal, strong, "the MCP himself"
 - **Erase dead players**, **Fast finish**
 - **Camera** — circling, behind, cockpit, mouse
@@ -105,7 +107,7 @@ for the current session only and reset when the page is reloaded:
 ## URL parameters (handy for demos and testing)
 
 `?play=1` starts a round immediately, `?spectate=1` skips the menu,
-`?seed=N` fixes the random seed, `?arena=N`, `?speed=N`, `?humans=N`,
+`?seed=N` fixes the random seed, `?arena=N`, `?speed=N`, `?humans=N` (0–2),
 `?cam=0..3`, `?vp=single|split|quad|auto`, `?time=MS` fast-forwards the round,
 `?hud=0` hides the HUD, `?nosound=1` starts muted,
 `?music=off|mix|amber|siege|original|grid|grid2` picks a soundtrack, `?touch=1` forces the
@@ -114,7 +116,7 @@ touch pad, `?fps=1` shows the frame counter.
 Examples:
 
 ```
-index.html?play=1&humans=4&vp=quad
+index.html?play=1&humans=2&vp=split
 index.html?spectate=1&arena=480&time=15000
 index.html?play=1&humans=1&cam=2&time=800        (cockpit, first second)
 ```

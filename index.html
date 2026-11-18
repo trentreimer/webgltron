@@ -206,7 +206,12 @@
     padding:0;
   }
   .tbtn:active{background:rgba(95,240,255,.28);color:#fff}
-  .tbtn.boost{width:94px;height:58px;border-radius:30px;font-size:10px;letter-spacing:.2em;align-self:flex-end}
+  .boostWrap{display:flex;flex-direction:column;align-items:center;gap:6px;align-self:flex-end}
+  .tbtn.boost{width:94px;height:58px;border-radius:30px;font-size:10px;letter-spacing:.2em}
+  .boostBar{width:94px;height:5px;border-radius:2px;overflow:hidden;pointer-events:none;
+    background:rgba(120,200,220,.16);box-shadow:inset 0 0 6px rgba(18,168,196,.18)}
+  .boostBar .fill{width:100%;height:100%;transform-origin:left center;transform:scaleX(1);
+    background:#5ff0ff;box-shadow:0 0 10px #5ff0ff;transition:background .12s}
 
   @media (max-width:740px){
     .rows{grid-template-columns:1fr}
@@ -286,14 +291,12 @@
   <section id="help" class="panel narrow hidden">
     <h2>controls</h2>
     <div class="helpGrid">
-      <span class="k">Player 1</span><span><b>A</b> turn left · <b>S</b> turn right · <b>Q</b>/<b>W</b> glance · <b>E</b> boost<br>
-        <span class="h">single-player: arrows + space also work</span></span>
-      <span class="k">Player 2</span><span><b>J</b> left · <b>K</b> right · <b>U</b>/<b>I</b> glance · <b>L</b> boost</span>
-      <span class="k">Player 3</span><span><b>←</b> left · <b>→</b> right · <b>Del</b>/<b>End</b> glance · <b>↓</b> boost</span>
-      <span class="k">Player 4</span><span><b>4</b> left · <b>6</b> right · <b>7</b>/<b>9</b> glance · <b>5</b> boost</span>
+      <span class="k">Player 1</span><span><b>←</b>/<b>→</b> or <b>K</b>/<b>L</b> turn · <b>Del</b>/<b>End</b> or <b>I</b>/<b>O</b> glance · <b>Space</b> or <b>P</b> boost</span>
+      <span class="k">Player 2</span><span><b>A</b> left · <b>S</b> right · <b>Q</b>/<b>W</b> glance · <b>E</b> boost</span>
+      <span class="k">Players 3–4</span><span>computer or none — never human</span>
       <span class="k">Camera</span><span><b>F10</b> or <b>C</b> cycle mode · drag mouse in Mouse mode to orbit, wheel to zoom</span>
       <span class="k">Viewports</span><span><b>F1</b> single · <b>F2</b> split · <b>F3</b> quad · <b>F4</b> auto</span>
-      <span class="k">Game</span><span><b>P</b> pause · <b>R</b> restart round · <b>Esc</b> pause menu · <b>M</b> mute</span>
+      <span class="k">Game</span><span><b>Esc</b> pause · <b>R</b> restart round · <b>M</b> mute</span>
     </div>
     <div class="rules">
       <b>How to play.</b> You are a lightcycle. You cannot stop and you cannot slow down.
@@ -315,7 +318,10 @@
 
 <div id="touch">
   <button id="tLeft" class="tbtn" aria-label="turn left">◀</button>
-  <button id="tBoost" class="tbtn boost" aria-label="boost">boost</button>
+  <div id="tBoostWrap" class="boostWrap">
+    <button id="tBoost" class="tbtn boost" aria-label="boost">boost</button>
+    <div id="tBoostBar" class="boostBar"><div id="tBoostFill" class="fill"></div></div>
+  </div>
   <button id="tRight" class="tbtn" aria-label="turn right">▶</button>
 </div>
 
@@ -2803,6 +2809,8 @@ var R = (function () {
   var helpEl = $("help");
   var toastEl = $("toast");
   var touchEl = $("touch");
+  var touchBoostWrap = $("tBoostWrap");
+  var touchBoostFill = $("tBoostFill");
   var body = document.body;
 
   var MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
@@ -2813,7 +2821,7 @@ var R = (function () {
     roster: [0, 1, 1, 1],
     arena: 720,
     speed: 6.5,
-    gameType: "booster",
+    gameType: "classic",
     aiLevel: 1,
     camType: 1,
     viewports: "auto",
@@ -2851,7 +2859,11 @@ var R = (function () {
     } catch (e) { /* private mode / corrupt storage */ }
     if (["off", "mix", "amber", "siege", "original", "grid", "steel"].indexOf(s.musicMode) < 0) s.musicMode = "mix";
     if (!Array.isArray(s.roster) || s.roster.length !== 4) s.roster = [0, 1, 1, 1];
-    s.roster = s.roster.map(function (v) { return (v === 0 || v === 1 || v === 2) ? v : 1; });
+    s.roster = s.roster.map(function (v, i) {
+      if (v !== 0 && v !== 1 && v !== 2) v = 1;
+      if (i >= 2 && v === 0) v = 1;
+      return v;
+    });
     return s;
   }
 
@@ -2863,6 +2875,7 @@ var R = (function () {
 
   /* ---------------- option tables ---------------- */
   var OPT_ROSTER = [{ v: 0, l: "human" }, { v: 1, l: "computer" }, { v: 2, l: "none" }];
+  var OPT_BOT_ROSTER = [{ v: 1, l: "computer" }, { v: 2, l: "none" }];
   var OPT_ARENA = [{ v: 160, l: "tiny" }, { v: 240, l: "medium" }, { v: 480, l: "big" },
                    { v: 720, l: "vast" }, { v: 1200, l: "extreme" }];
   var OPT_SPEED = [{ v: 5, l: "boring" }, { v: 6.5, l: "normal" },
@@ -2901,13 +2914,15 @@ var R = (function () {
 
   function gameSettings() {
     var gt = settings.gameType;
+    var roster = settings.roster.slice(0, 4);
+    for (var i = 2; i < 4; i++) if (roster[i] === 0) roster[i] = 1;
     return {
       speed: settings.speed,
       arena: settings.arena,
       aiLevel: settings.aiLevel,
       camType: settings.camType,
       viewports: settings.viewports,
-      roster: settings.roster.slice(0, 4),
+      roster: roster,
       booster: gt === "booster" || gt === "both",
       wallAccel: gt === "wall" || gt === "both",
       eraseCrashed: settings.eraseCrashed,
@@ -2925,7 +2940,8 @@ var R = (function () {
   var selIndex = 0;
 
   function bumpRoster(i, d) {
-    var next = cycle(OPT_ROSTER, settings.roster[i], d);
+    var table = i >= 2 ? OPT_BOT_ROSTER : OPT_ROSTER;
+    var next = cycle(table, settings.roster[i], d);
     var trial = settings.roster.slice();
     trial[i] = next;
     var n = 0;
@@ -2940,7 +2956,10 @@ var R = (function () {
 
   function menuItems() {
     var items = [];
-    items.push({ kind: "action", label: "Start Game", hot: true, act: function () { startGame(); } });
+    items.push({ kind: "action", label: "Start Game", hot: true, act: function () {
+      enterGameFullscreen();
+      startGame();
+    } });
     items.push({ kind: "action", label: "Watch Demo", act: function () { spectate(); } });
     items.push({ kind: "sep", label: "players" });
     for (var i = 0; i < 4; i++) {
@@ -3194,6 +3213,7 @@ var R = (function () {
   }
 
   function showMenu() {
+    exitGameFullscreen();
     blurUI();
     stopCursorIdle();
     state = "menu";
@@ -3231,6 +3251,7 @@ var R = (function () {
 
   function openOver() {
     stopCursorIdle();
+    touchEl.classList.remove("on");
     hideAllPanels();
     overEl.classList.remove("hidden");
     body.classList.add("dim");
@@ -3258,6 +3279,34 @@ var R = (function () {
     hasTouch = window.matchMedia("(pointer: coarse)").matches;
   } catch (e2) { hasTouch = "ontouchstart" in window; }
 
+  function isSmallScreen() {
+    try {
+      return window.matchMedia("(pointer: coarse)").matches ||
+             window.matchMedia("(max-width: 740px)").matches ||
+             window.matchMedia("(max-height: 520px)").matches;
+    } catch (e) {
+      return window.innerWidth <= 740 || window.innerHeight <= 520;
+    }
+  }
+
+  function enterGameFullscreen() {
+    if (!isSmallScreen() || document.fullscreenElement) return;
+    var root = document.documentElement;
+    if (!root || !root.requestFullscreen) return;
+    try {
+      var p = root.requestFullscreen();
+      if (p && p.catch) p.catch(function () { /* denied or unsupported */ });
+    } catch (e) { /* ignore */ }
+  }
+
+  function exitGameFullscreen() {
+    if (!document.fullscreenElement || !document.exitFullscreen) return;
+    try {
+      var p = document.exitFullscreen();
+      if (p && p.catch) p.catch(function () { /* ignore */ });
+    } catch (e) { /* ignore */ }
+  }
+
   function nextSeed() {
     if (seedOverride) return seedOverride;
     return (Math.random() * 2147483647) | 0;
@@ -3272,6 +3321,30 @@ var R = (function () {
     if (!g) return;
     var sz = R.size();
     viewports = R.computeViewports(g, sz.cssW, sz.cssH);
+  }
+
+  function updateTouchControls() {
+    var g = runGame();
+    var idx = g ? primaryHuman(g) : -1;
+    var on = hasTouch && idx >= 0;
+    touchEl.classList.toggle("on", on);
+    var boostOn = !!(on && g.S.booster);
+    touchBoostWrap.classList.toggle("hidden", !boostOn);
+    if (!boostOn) touchBoostFill.style.transform = "scaleX(0)";
+  }
+
+  function updateTouchBoostBar() {
+    if (!touchEl.classList.contains("on") || touchBoostWrap.classList.contains("hidden")) return;
+    var g = runGame();
+    if (!g || !g.S.booster) return;
+    var idx = primaryHuman(g);
+    if (idx < 0) return;
+    var p = g.players[idx];
+    var frac = Math.max(0, Math.min(1, p.booster / g.S.booster_max));
+    touchBoostFill.style.transform = "scaleX(" + frac + ")";
+    var col = p.boostEnabled ? "#ffffff" : R.PAL[idx].ui;
+    touchBoostFill.style.background = col;
+    touchBoostFill.style.boxShadow = "0 0 10px " + col;
   }
 
   function startGame() {
@@ -3293,15 +3366,17 @@ var R = (function () {
     lastTime = 0;
     hudCanvas.style.opacity = "1";
     refreshViewports();
-    touchEl.classList.toggle("on", hasTouch && primaryHuman(game) >= 0);
+    updateTouchControls();
     startCursorIdle();
     lastRecSound = -1e9;
     if (audio) audio.engine(true);
     addMessage("round start", "rgba(150,235,255,.85)");
     if (!hintShown) {
       hintShown = true;
-      addMessage("A / S turn  ·  Q / W glance  ·  E boost  ·  Esc pause",
-                 "rgba(150,235,255,.9)");
+      addMessage(gs.booster
+        ? "← / → turn  ·  Del / End glance  ·  Space / P boost  ·  Esc pause"
+        : "← / → turn  ·  Del / End glance  ·  Esc pause",
+        "rgba(150,235,255,.9)");
     }
   }
 
@@ -3446,7 +3521,10 @@ var R = (function () {
     var by = vp.y + pad + scoreSize + 22;
     var bw = Math.max(64, Math.min(vp.w * 0.22, 148));
     var bh = 4;
-    if (g.S.booster) {
+    var onScreenBoost = g.S.booster && vp.player === primaryHuman(g) &&
+                        touchEl.classList.contains("on") &&
+                        !touchBoostWrap.classList.contains("hidden");
+    if (g.S.booster && !onScreenBoost) {
       hctx.fillStyle = "rgba(120,200,220,.16)";
       hctx.fillRect(bx, by, bw, bh);
       var frac = Math.max(0, Math.min(1, p.booster / g.S.booster_max));
@@ -3938,11 +4016,11 @@ var R = (function () {
 
   /* ---------------- input ---------------- */
   var KEYMAP = [
+    { left: ["ArrowLeft", "KeyK"], right: ["ArrowRight", "KeyL"],
+      gl: ["Delete", "KeyI"], gr: ["End", "KeyO"], boost: ["Space", "KeyP"] },
     { left: ["KeyA"], right: ["KeyS"], gl: ["KeyQ"], gr: ["KeyW"], boost: ["KeyE"] },
-    { left: ["KeyJ"], right: ["KeyK"], gl: ["KeyU"], gr: ["KeyI"], boost: ["KeyL"] },
-    { left: ["ArrowLeft"], right: ["ArrowRight"], gl: ["Delete"], gr: ["End"], boost: ["ArrowDown"] },
-    { left: ["Numpad4", "Digit4"], right: ["Numpad6", "Digit6"],
-      gl: ["Numpad7", "Digit7"], gr: ["Numpad9", "Digit9"], boost: ["Numpad5", "Digit5"] }
+    { left: [], right: [], gl: [], gr: [], boost: [] },
+    { left: [], right: [], gl: [], gr: [], boost: [] }
   ];
 
   function keyIs(binding, code) {
@@ -3964,11 +4042,6 @@ var R = (function () {
     return r;
   }
 
-  function singleHuman(g) {
-    var h = humanList(g);
-    return h.length === 1 ? h[0] : -1;
-  }
-
   function primaryHuman(g) {
     var h = humanList(g);
     return h.length ? h[0] : -1;
@@ -3983,11 +4056,6 @@ var R = (function () {
       k = KEYMAP[i];
       if (keyIs(k.left, code)) return { player: i, dir: CORE.TURN_LEFT };
       if (keyIs(k.right, code)) return { player: i, dir: CORE.TURN_RIGHT };
-    }
-    var solo = singleHuman(g);
-    if (solo >= 0) {
-      if (code === "ArrowLeft") return { player: solo, dir: CORE.TURN_LEFT };
-      if (code === "ArrowRight") return { player: solo, dir: CORE.TURN_RIGHT };
     }
     return null;
   }
@@ -4008,8 +4076,6 @@ var R = (function () {
       k = KEYMAP[i];
       if (keyIs(k.boost, code)) { setBoost(i, down); return true; }
     }
-    var solo = singleHuman(g);
-    if (solo >= 0 && code === "Space") { setBoost(solo, down); return true; }
     return false;
   }
 
@@ -4053,7 +4119,7 @@ var R = (function () {
     var g = runGame();
     if (!g) return;
     var code = e.code;
-    if (code === "Escape" || code === "KeyP") {
+    if (code === "Escape") {
       e.preventDefault();
       pauseGame();
       return;
@@ -4080,7 +4146,7 @@ var R = (function () {
 
   function pausedKey(e) {
     var code = e.code;
-    if (code === "Escape" || code === "KeyP" || code === "Enter") {
+    if (code === "Escape" || code === "Enter") {
       e.preventDefault();
       resumeGame();
     } else if (code === "KeyR") {
@@ -4155,7 +4221,7 @@ var R = (function () {
     hudCanvas.style.opacity = "1";
     state = "playing";
     lastTime = 0;
-    touchEl.classList.toggle("on", hasTouch && primaryHuman(game) >= 0);
+    updateTouchControls();
     startCursorIdle();
     if (audio) audio.engine(true);
   }
@@ -4369,7 +4435,7 @@ var R = (function () {
     }
     if (q.has("map")) settings.map = Math.max(0, Math.min(1, parseFloat(q.get("map")) || 0));
     if (q.has("humans")) {
-      var n = Math.max(0, Math.min(4, parseInt(q.get("humans"), 10) || 0));
+      var n = Math.max(0, Math.min(2, parseInt(q.get("humans"), 10) || 0));
       for (var i = 0; i < 4; i++) settings.roster[i] = i < n ? 0 : 1;
     }
     if (q.get("nosound") === "1") { settings.sound = false; settings.musicMode = "off"; }
@@ -4482,6 +4548,7 @@ var R = (function () {
     updateEngineSound();
     updateRecognizerSound(now);
     pollGamepad();
+    updateTouchBoostBar();
 
     if (g) {
       refreshViewports();
@@ -4523,6 +4590,7 @@ var R = (function () {
     window.addEventListener("orientationchange", function () {
       setTimeout(resizeAll, 240);
     });
+    document.addEventListener("fullscreenchange", resizeAll);
     window.addEventListener("keydown", onKeyDown, false);
     window.addEventListener("keyup", onKeyUp, false);
     document.addEventListener("click", onUiClick, false);
