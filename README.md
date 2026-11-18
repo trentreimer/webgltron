@@ -48,6 +48,10 @@ next to it if you want the soundtracks.
   viewports, and returning to the menu exits it.
 - **Mode-aware touch controls** — the on-screen boost button and its charge bar
   appear only in booster game modes.
+- **Large touch targets** — the lower left and right screen halves turn the
+  cycle while the visible buttons stay compact.
+- **Touch pause button** — a translucent hamburger control in the top-right opens
+  the pause menu on touch screens.
 
 ## Controls
 

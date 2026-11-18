@@ -197,6 +197,11 @@
     padding:0 16px calc(16px + env(safe-area-inset-bottom)) 16px;
     justify-content:space-between;align-items:flex-end;gap:12px;pointer-events:none}
   #touch.on{display:flex}
+  .touchZone{position:fixed;bottom:0;width:50%;height:60vh;z-index:0;
+    pointer-events:auto;touch-action:none}
+  .touchZone.left{left:0}
+  .touchZone.right{right:0}
+  #touch > .tbtn,#touch > .boostWrap{position:relative;z-index:1}
   .tbtn{
     pointer-events:auto;width:78px;height:78px;border-radius:50%;
     background:rgba(6,26,34,.45);border:1px solid rgba(95,240,255,.4);
@@ -205,7 +210,21 @@
     box-shadow:0 0 24px rgba(18,168,196,.18), inset 0 0 18px rgba(18,168,196,.1);
     padding:0;
   }
-  .tbtn:active{background:rgba(95,240,255,.28);color:#fff}
+  .tbtn:active,.tbtn.pressed{background:rgba(95,240,255,.28);color:#fff}
+  .tbtn.turn{font-size:0}
+  .tbtn .glyph{display:block;width:28px;height:28px;fill:currentColor;pointer-events:none}
+  #tLeft .glyph{transform:translateX(-2px)}
+  #tRight .glyph{transform:translateX(2px)}
+  .touchMenu{
+    position:fixed;top:env(safe-area-inset-top);
+    right:env(safe-area-inset-right);
+    z-index:5;pointer-events:auto;width:46px;height:46px;border-radius:14px;
+    display:grid;place-items:center;padding:0;color:#bff3ff;
+    background:transparent;border:0;
+  }
+  .touchMenu:active{background:rgba(95,240,255,.28);color:#fff}
+  .touchMenu svg{display:block;width:24px;height:24px;fill:none;stroke:currentColor;
+    stroke-width:2;stroke-linecap:round}
   .boostWrap{display:flex;flex-direction:column;align-items:center;gap:6px;align-self:flex-end}
   .tbtn.boost{width:94px;height:58px;border-radius:30px;font-size:10px;letter-spacing:.2em}
   .boostBar{width:94px;height:5px;border-radius:2px;overflow:hidden;pointer-events:none;
@@ -317,12 +336,27 @@
 <div id="toast"></div>
 
 <div id="touch">
-  <button id="tLeft" class="tbtn" aria-label="turn left">◀</button>
+  <div id="tLeftZone" class="touchZone left" aria-hidden="true"></div>
+  <div id="tRightZone" class="touchZone right" aria-hidden="true"></div>
+  <button id="tLeft" class="tbtn turn" aria-label="turn left">
+    <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M17 3 L7 12 L17 21 Z"></path>
+    </svg>
+  </button>
   <div id="tBoostWrap" class="boostWrap">
     <button id="tBoost" class="tbtn boost" aria-label="boost">boost</button>
     <div id="tBoostBar" class="boostBar"><div id="tBoostFill" class="fill"></div></div>
   </div>
-  <button id="tRight" class="tbtn" aria-label="turn right">▶</button>
+  <button id="tRight" class="tbtn turn" aria-label="turn right">
+    <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M7 3 L17 12 L7 21 Z"></path>
+    </svg>
+  </button>
+  <button id="tMenu" class="touchMenu" data-act="pause" aria-label="pause menu">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 7h14M5 12h14M5 17h14"></path>
+    </svg>
+  </button>
 </div>
 
 <script>
@@ -3275,6 +3309,7 @@ var R = (function () {
   var lastRecSound = -1e9;
   var recAcoustic = { x: 0, y: 0, z: 0, dx: 0, dy: 0 };
   var hasTouch = false;
+  var DEV_SHOW_TOUCH_CONTROLS = false;
   try {
     hasTouch = window.matchMedia("(pointer: coarse)").matches;
   } catch (e2) { hasTouch = "ontouchstart" in window; }
@@ -3326,7 +3361,7 @@ var R = (function () {
   function updateTouchControls() {
     var g = runGame();
     var idx = g ? primaryHuman(g) : -1;
-    var on = hasTouch && idx >= 0;
+    var on = (hasTouch || DEV_SHOW_TOUCH_CONTROLS) && idx >= 0;
     touchEl.classList.toggle("on", on);
     var boostOn = !!(on && g.S.booster);
     touchBoostWrap.classList.toggle("hidden", !boostOn);
@@ -4288,6 +4323,7 @@ var R = (function () {
     if (!b) return;
     var act = b.getAttribute("data-act");
     if (act === "resume") resumeGame();
+    else if (act === "pause") pauseGame();
     else if (act === "restart") restartRound();
     else if (act === "menu") toMenu();
     else if (act === "again") playAgain();
@@ -4337,15 +4373,18 @@ var R = (function () {
     }, { passive: false });
   }
 
-  function bindTouchButton(el, down, up) {
+  function bindTouchButton(el, down, up, visual) {
     if (!el) return;
+    var lit = visual || el;
     el.addEventListener("pointerdown", function (e) {
       e.preventDefault();
       ensureAudio();
+      if (lit) lit.classList.add("pressed");
       down();
     });
     function release(e) {
       if (e) e.preventDefault();
+      if (lit) lit.classList.remove("pressed");
       if (up) up();
     }
     el.addEventListener("pointerup", release);
@@ -4358,21 +4397,21 @@ var R = (function () {
       var g = runGame();
       return g ? primaryHuman(g) : -1;
     };
-    bindTouchButton($("tLeft"), function () {
+    var turn = function (dir) {
       var i = solo();
-      if (i >= 0 && game) game.queueTurn(i, CORE.TURN_LEFT);
-    });
-    bindTouchButton($("tRight"), function () {
+      if (i >= 0 && game) game.queueTurn(i, dir);
+    };
+    var boost = function (on) {
       var i = solo();
-      if (i >= 0 && game) game.queueTurn(i, CORE.TURN_RIGHT);
-    });
-    bindTouchButton($("tBoost"), function () {
-      var i = solo();
-      if (i >= 0) setBoost(i, true);
-    }, function () {
-      var i = solo();
-      if (i >= 0) setBoost(i, false);
-    });
+      if (i >= 0) setBoost(i, on);
+    };
+    var left = $("tLeft");
+    var right = $("tRight");
+    bindTouchButton(left, function () { turn(CORE.TURN_LEFT); });
+    bindTouchButton(right, function () { turn(CORE.TURN_RIGHT); });
+    bindTouchButton($("tLeftZone"), function () { turn(CORE.TURN_LEFT); }, null, left);
+    bindTouchButton($("tRightZone"), function () { turn(CORE.TURN_RIGHT); }, null, right);
+    bindTouchButton($("tBoost"), function () { boost(true); }, function () { boost(false); });
   }
 
   /* ---------------- gamepad ---------------- */
