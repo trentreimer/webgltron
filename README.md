@@ -45,7 +45,9 @@ next to it if you want the soundtracks.
 - **Menus, pause, help and round-over screens**, persisted settings and
   session-only scores, minimap, FPS counter, touch controls and gamepad support.
 - **Small-screen fullscreen** — Start Game requests fullscreen on touch or compact
-  viewports, and returning to the menu exits it.
+  viewports, locks the screen to landscape where the browser supports it, and
+  returning to the menu exits it. If orientation locking is unavailable and the
+  device is held in portrait, a rotate hint appears for three seconds.
 - **Mode-aware touch controls** — the on-screen boost button and its charge bar
   appear only in booster game modes.
 - **Large touch targets** — the lower left and right screen halves turn the

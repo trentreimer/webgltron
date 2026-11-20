@@ -193,6 +193,19 @@
   }
   #toast.on{opacity:1}
 
+  #rotate{
+    position:fixed;inset:0;z-index:7;display:grid;place-items:center;padding:18px;
+    background:rgba(0,2,4,.82);
+  }
+  #rotate .rotateCard{
+    width:min(420px,92vw);padding:22px 20px;text-align:center;
+    border:1px solid rgba(95,240,255,.28);
+    background:linear-gradient(180deg, rgba(4,16,22,.97) 0%, rgba(1,7,11,.98) 100%);
+    box-shadow:0 0 0 1px rgba(0,0,0,.7), 0 0 26px rgba(18,168,196,.16), 0 30px 90px rgba(0,0,0,.75);
+  }
+  #rotate p{margin:0 0 16px;font-size:11px;line-height:1.8;letter-spacing:.06em;color:#a7ccd8}
+  #rotate .btns{margin-top:0}
+
   #touch{position:fixed;left:0;right:0;bottom:0;z-index:4;display:none;
     padding:0 16px calc(16px + env(safe-area-inset-bottom)) 16px;
     justify-content:space-between;align-items:flex-end;gap:12px;pointer-events:none}
@@ -334,6 +347,14 @@
 </div>
 
 <div id="toast"></div>
+
+<div id="rotate" class="hidden">
+  <div class="rotateCard">
+    <h2>landscape</h2>
+    <p>Rotate your device for the intended view.</p>
+    <div class="btns"><button data-act="dismissrotate">Dismiss</button></div>
+  </div>
+</div>
 
 <div id="touch">
   <div id="tLeftZone" class="touchZone left" aria-hidden="true"></div>
@@ -2842,6 +2863,7 @@ var R = (function () {
   var overScoresEl = $("overScores");
   var helpEl = $("help");
   var toastEl = $("toast");
+  var rotateEl = $("rotate");
   var touchEl = $("touch");
   var touchBoostWrap = $("tBoostWrap");
   var touchBoostFill = $("tBoostFill");
@@ -3259,6 +3281,7 @@ var R = (function () {
     hudCanvas.style.opacity = "0";
     if (audio) audio.engine(false);
     touchEl.classList.remove("on");
+    updateRotateHint();
   }
 
   function hideAllPanels() {
@@ -3274,6 +3297,7 @@ var R = (function () {
     hideAllPanels();
     helpEl.classList.remove("hidden");
     body.classList.add("dim");
+    updateRotateHint();
   }
 
   function openPause() {
@@ -3281,6 +3305,7 @@ var R = (function () {
     hideAllPanels();
     pauseEl.classList.remove("hidden");
     body.classList.add("dim");
+    updateRotateHint();
   }
 
   function openOver() {
@@ -3289,6 +3314,7 @@ var R = (function () {
     hideAllPanels();
     overEl.classList.remove("hidden");
     body.classList.add("dim");
+    updateRotateHint();
   }
 
   /* ---------------- game lifecycle ---------------- */
@@ -3324,14 +3350,116 @@ var R = (function () {
     }
   }
 
+  var orientationLockUnavailable = false;
+  var rotateHintDismissed = false;
+  var rotateHintShown = false;
+  var rotateHintTimer = 0;
+
+  function screenOrientation() {
+    return window.screen && window.screen.orientation;
+  }
+
+  function lockLandscape() {
+    var so = screenOrientation();
+    if (!so || typeof so.lock !== "function") {
+      orientationLockUnavailable = true;
+      updateRotateHint();
+      return;
+    }
+    try {
+      var p = so.lock("landscape");
+      if (p && p.then) {
+        p.then(function () {
+          orientationLockUnavailable = false;
+          updateRotateHint();
+        }, function () {
+          orientationLockUnavailable = true;
+          updateRotateHint();
+        });
+      } else {
+        orientationLockUnavailable = false;
+        updateRotateHint();
+      }
+    } catch (e) {
+      orientationLockUnavailable = true;
+      updateRotateHint();
+    }
+  }
+
+  function unlockOrientation() {
+    var so = screenOrientation();
+    if (!so || typeof so.unlock !== "function") return;
+    try { so.unlock(); } catch (e) { /* ignore */ }
+  }
+
+  function isPortrait() {
+    try {
+      return window.matchMedia("(orientation: portrait)").matches;
+    } catch (e) {
+      return window.innerHeight > window.innerWidth;
+    }
+  }
+
+  function hideRotateHint() {
+    if (rotateHintTimer) { clearTimeout(rotateHintTimer); rotateHintTimer = 0; }
+    if (rotateEl) rotateEl.classList.add("hidden");
+  }
+
+  function showRotateHint() {
+    if (!rotateEl) return;
+    rotateEl.classList.remove("hidden");
+    if (rotateHintTimer) clearTimeout(rotateHintTimer);
+    rotateHintTimer = setTimeout(hideRotateHint, 3000);
+  }
+
+  function updateRotateHint() {
+    var portrait = isPortrait();
+    var applicable = hasTouch && isSmallScreen();
+    if (!portrait || !applicable) {
+      rotateHintShown = false;
+      hideRotateHint();
+      return;
+    }
+    if (state !== "playing" || !orientationLockUnavailable) {
+      hideRotateHint();
+      return;
+    }
+    if (rotateHintShown || rotateHintDismissed) return;
+    rotateHintShown = true;
+    showRotateHint();
+  }
+
+  function dismissRotateHint() {
+    rotateHintDismissed = true;
+    hideRotateHint();
+  }
+
   function enterGameFullscreen() {
-    if (!isSmallScreen() || document.fullscreenElement) return;
+    if (!isSmallScreen()) return;
+    if (document.fullscreenElement) {
+      lockLandscape();
+      return;
+    }
     var root = document.documentElement;
-    if (!root || !root.requestFullscreen) return;
+    if (!root || !root.requestFullscreen) {
+      orientationLockUnavailable = true;
+      updateRotateHint();
+      return;
+    }
     try {
       var p = root.requestFullscreen();
-      if (p && p.catch) p.catch(function () { /* denied or unsupported */ });
-    } catch (e) { /* ignore */ }
+      if (p && p.then) {
+        p.then(lockLandscape, function () {
+          orientationLockUnavailable = true;
+          updateRotateHint();
+        });
+      } else {
+        lockLandscape();
+      }
+    } catch (e) {
+      orientationLockUnavailable = true;
+      updateRotateHint();
+    }
   }
 
   function exitGameFullscreen() {
@@ -3402,6 +3530,7 @@ var R = (function () {
     hudCanvas.style.opacity = "1";
     refreshViewports();
     updateTouchControls();
+    updateRotateHint();
     startCursorIdle();
     lastRecSound = -1e9;
     if (audio) audio.engine(true);
@@ -3427,6 +3556,7 @@ var R = (function () {
     touchEl.classList.remove("on");
     if (audio) audio.engine(false);
     lastTime = 0;
+    updateRotateHint();
   }
 
   function newDemo() {
@@ -3501,11 +3631,13 @@ var R = (function () {
       body.classList.remove("dim");
       lastTime = 0;
       startCursorIdle();
+      updateRotateHint();
       return;
     }
     if (helpReturn === "spectate") {
       body.classList.remove("dim");
       lastTime = 0;
+      updateRotateHint();
       return;
     }
     showMenu();
@@ -3520,6 +3652,7 @@ var R = (function () {
     hudCanvas.height = Math.max(1, Math.round(sz.cssH * hudDpr));
     lastTime = 0;
     refreshViewports();
+    updateRotateHint();
   }
 
   function addMessage(text, color) {
@@ -4246,6 +4379,7 @@ var R = (function () {
       audio.engine(false);
     }
     touchEl.classList.remove("on");
+    updateRotateHint();
   }
 
   function resumeGame() {
@@ -4258,6 +4392,7 @@ var R = (function () {
     lastTime = 0;
     updateTouchControls();
     startCursorIdle();
+    updateRotateHint();
     if (audio) audio.engine(true);
   }
 
@@ -4328,6 +4463,7 @@ var R = (function () {
     else if (act === "menu") toMenu();
     else if (act === "again") playAgain();
     else if (act === "closehelp") closeHelp();
+    else if (act === "dismissrotate") dismissRotateHint();
     else if (act === "help") {
       openHelp(state === "over" ? "over" : (state === "menu" ? "menu" : "paused"));
     }
@@ -4629,7 +4765,10 @@ var R = (function () {
     window.addEventListener("orientationchange", function () {
       setTimeout(resizeAll, 240);
     });
-    document.addEventListener("fullscreenchange", resizeAll);
+    document.addEventListener("fullscreenchange", function () {
+      if (!document.fullscreenElement) unlockOrientation();
+      resizeAll();
+    });
     window.addEventListener("keydown", onKeyDown, false);
     window.addEventListener("keyup", onKeyUp, false);
     document.addEventListener("click", onUiClick, false);
